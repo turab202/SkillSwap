@@ -528,8 +528,9 @@ class _SignupForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
-      child: Column(
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
           AppTextField(
             hint: 'Your full name',
             label: 'Full Name',
@@ -571,7 +572,8 @@ class _SignupForm extends StatelessWidget {
             onPressed: onSubmit,
             color: AppColors.primary,
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
