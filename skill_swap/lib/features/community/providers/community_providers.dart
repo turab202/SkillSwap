@@ -11,9 +11,11 @@ final allCommunitiesProvider = StreamProvider<List<CommunityModel>>((ref) =>
     ref.watch(communityRepositoryProvider).watchCommunities());
 
 final userCommunitiesProvider = StreamProvider<List<CommunityModel>>((ref) {
-  final user = ref.watch(currentUserProvider).value;
-  if (user == null) return Stream.value([]);
-  return ref.watch(communityRepositoryProvider).watchUserCommunities(user.uid);
+  final authUser = ref.watch(authStateProvider).value;
+  if (authUser == null) return Stream.value([]);
+  return ref
+      .watch(communityRepositoryProvider)
+      .watchUserCommunities(authUser.uid);
 });
 
 final upcomingEventsProvider = StreamProvider<List<EventModel>>((ref) =>

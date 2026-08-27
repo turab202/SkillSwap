@@ -48,7 +48,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen>
   }
 
   Future<void> _showCreateCommunityDialog() async {
-    final user = ref.read(currentUserProvider).value;
+    final user = ref.read(authRepositoryProvider).currentFirebaseUser;
     if (user == null) return;
 
     String category = 'Education';

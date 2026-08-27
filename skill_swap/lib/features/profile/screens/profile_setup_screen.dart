@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,6 +38,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     _skillOfferC.dispose();
     _skillWantC.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameC.text = FirebaseAuth.instance.currentUser?.displayName ?? '';
   }
 
   Future<void> _pickPhoto() async {

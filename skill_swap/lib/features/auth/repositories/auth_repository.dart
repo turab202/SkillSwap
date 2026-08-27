@@ -39,9 +39,9 @@ class AuthRepository {
 
   // ── Google ─────────────────────────────────────────────────────────────────
   Future<void> signInWithGoogle() async {
-    final googleUser = await _googleSignIn
-        .signIn()
-        .timeout(const Duration(seconds: 30));
+    final googleUser = await _googleSignIn.signIn().timeout(
+      const Duration(seconds: 30),
+    );
     if (googleUser == null) throw Exception('Google sign-in cancelled.');
     final googleAuth = await googleUser.authentication.timeout(
       const Duration(seconds: 30),
@@ -51,12 +51,16 @@ class AuthRepository {
       idToken: googleAuth.idToken,
     );
     final result = await _auth.signInWithCredential(credential);
-    await _ensureUserDoc(
-      uid: result.user!.uid,
-      email: result.user!.email ?? '',
-      name: result.user!.displayName ?? googleUser.displayName ?? 'User',
-      photoUrl: result.user!.photoURL,
-    );
+    try {
+      await _ensureUserDoc(
+        uid: result.user!.uid,
+        email: result.user!.email ?? '',
+        name: result.user!.displayName ?? googleUser.displayName ?? 'User',
+        photoUrl: result.user!.photoURL,
+      ).timeout(const Duration(seconds: 8));
+    } catch (_) {
+      // Firebase authentication has already succeeded; profile sync can retry later.
+    }
   }
 
   // ── Apple ──────────────────────────────────────────────────────────────────
