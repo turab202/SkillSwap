@@ -20,8 +20,12 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
 });
 
 // ── Repository providers ───────────────────────────────────────────────────
-final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());
-final profileRepositoryProvider = Provider<ProfileRepository>((ref) => ProfileRepository());
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => AuthRepository(),
+);
+final profileRepositoryProvider = Provider<ProfileRepository>(
+  (ref) => ProfileRepository(),
+);
 
 // ── Auth actions notifier ──────────────────────────────────────────────────
 enum AuthStatus { idle, loading, success, error }
@@ -107,13 +111,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   String _friendly(Object e) {
     final msg = e.toString();
-    if (msg.contains('cancelled') || msg.contains('canceled')) return 'Sign-in was cancelled.';
-    if (msg.contains('user-not-found') || msg.contains('wrong-password') || msg.contains('invalid-credential')) return 'Invalid email or password.';
+    if (e is FirebaseAuthException) {
+      if (e.code == 'account-exists-with-different-credential') {
+        return 'This email is already linked to another sign-in method.';
+      }
+      if (e.code == 'credential-already-in-use') {
+        return 'This Google account is already linked to another user.';
+      }
+    }
+    if (msg.contains('cancelled') || msg.contains('canceled'))
+      return 'Sign-in was cancelled.';
+    if (msg.contains('user-not-found') ||
+        msg.contains('wrong-password') ||
+        msg.contains('invalid-credential'))
+      return 'Invalid email or password.';
     if (msg.contains('email-already-in-use')) return 'Email already in use.';
     if (msg.contains('weak-password')) return 'Password is too weak.';
-    if (msg.contains('network-request-failed')) return 'Network error. Check your connection.';
-    if (msg.contains('GoogleSignInApi') || msg.contains('channel-error') || msg.contains('ApiException')) {
-      return 'Google Sign-In is not configured yet. Please register your app SHA-1 in Firebase Console.';
+    if (msg.contains('network-request-failed'))
+      return 'Network error. Check your connection.';
+    if (msg.contains('ApiException: 10') || msg.contains('DEVELOPER_ERROR')) {
+      return 'Google Sign-In configuration is invalid. Check the Android package name and SHA-1 in Firebase Console.';
+    }
+    if (msg.contains('GoogleSignInApi') || msg.contains('channel-error')) {
+      return 'Google Sign-In is unavailable on this device. Use an emulator with Google Play services.';
     }
     return msg;
   }

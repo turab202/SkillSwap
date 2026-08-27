@@ -353,26 +353,11 @@ class _SocialButton extends StatelessWidget {
 class _GoogleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-      ),
-      child: Center(
-        child: Image.network(
-          'https://developers.google.com/identity/images/g-logo.png',
-          width: 18,
-          height: 18,
-          fit: BoxFit.contain,
-          errorBuilder: (ctx, err, st) => const Icon(
-            Icons.g_mobiledata,
-            color: Color(0xFF4285F4),
-            size: 16,
-          ),
-        ),
-      ),
+    return Image.asset(
+      'assets/images/google_g.png',
+      width: 22,
+      height: 22,
+      fit: BoxFit.contain,
     );
   }
 }

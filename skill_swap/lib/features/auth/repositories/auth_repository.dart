@@ -11,7 +11,10 @@ import '../models/user_model.dart';
 class AuthRepository {
   final _auth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
-  final _googleSignIn = GoogleSignIn();
+  final _googleSignIn = GoogleSignIn(
+    serverClientId:
+        '352867316217-idp08ep32lalce14v7ld0c8e98l0mki9.apps.googleusercontent.com',
+  );
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentFirebaseUser => _auth.currentUser;
