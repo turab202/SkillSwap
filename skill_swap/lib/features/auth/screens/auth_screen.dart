@@ -531,47 +531,47 @@ class _SignupForm extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-          AppTextField(
-            hint: 'Your full name',
-            label: 'Full Name',
-            controller: nameC,
-            prefix: const Icon(Icons.person_outline, size: 18),
-            validator: (v) => validateRequired(v, 'Name'),
-          ),
-          const SizedBox(height: 12),
-          AppTextField(
-            hint: 'hello@example.com',
-            label: 'Email Address',
-            controller: emailC,
-            keyboardType: TextInputType.emailAddress,
-            prefix: const Icon(Icons.email_outlined, size: 18),
-            validator: validateEmail,
-          ),
-          const SizedBox(height: 12),
-          AppTextField(
-            hint: '••••••••',
-            label: 'Password',
-            controller: passC,
-            obscure: obscure,
-            prefix: const Icon(Icons.lock_outline, size: 18),
-            suffix: IconButton(
-              icon: Icon(
-                obscure
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                size: 18,
-              ),
-              onPressed: onToggle,
+            AppTextField(
+              hint: 'Your full name',
+              label: 'Full Name',
+              controller: nameC,
+              prefix: const Icon(Icons.person_outline, size: 18),
+              validator: (v) => validateRequired(v, 'Name'),
             ),
-            validator: validatePassword,
-          ),
-          const SizedBox(height: 8),
-          AppButton(
-            label: 'Create Account',
-            loading: loading,
-            onPressed: onSubmit,
-            color: AppColors.primary,
-          ),
+            const SizedBox(height: 12),
+            AppTextField(
+              hint: 'hello@example.com',
+              label: 'Email Address',
+              controller: emailC,
+              keyboardType: TextInputType.emailAddress,
+              prefix: const Icon(Icons.email_outlined, size: 18),
+              validator: validateEmail,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              hint: '••••••••',
+              label: 'Password',
+              controller: passC,
+              obscure: obscure,
+              prefix: const Icon(Icons.lock_outline, size: 18),
+              suffix: IconButton(
+                icon: Icon(
+                  obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 18,
+                ),
+                onPressed: onToggle,
+              ),
+              validator: validatePassword,
+            ),
+            const SizedBox(height: 8),
+            AppButton(
+              label: 'Create Account',
+              loading: loading,
+              onPressed: onSubmit,
+              color: AppColors.primary,
+            ),
           ],
         ),
       ),
