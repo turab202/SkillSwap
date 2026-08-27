@@ -22,15 +22,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen>
   final _descC = TextEditingController();
   final _categories = [
     'Education',
-    'Design',
-    'Cooking',
-    'Gardening',
-    'Fitness',
     'Coding',
     'Music',
-    'Language',
-    'Crafts',
-    'Technology',
+    'Creative',
+    'Wellness',
+    'Local Life',
   ];
 
   @override
@@ -117,23 +113,38 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen>
               onPressed: () async {
                 final name = nameController.text.trim();
                 final desc = descController.text.trim();
-                if (name.isEmpty || desc.isEmpty) return;
+                if (name.isEmpty || desc.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Enter a community name and description.'),
+                    ),
+                  );
+                  return;
+                }
 
-                await ref
-                    .read(communityRepositoryProvider)
-                    .createCommunity(
-                      CommunityModel(
-                        id: '',
-                        name: name,
-                        description: desc,
-                        category: category,
-                        memberIds: [user.uid],
-                        createdBy: user.uid,
-                        createdAt: DateTime.now(),
-                      ),
-                    );
+                try {
+                  await ref
+                      .read(communityRepositoryProvider)
+                      .createCommunity(
+                        CommunityModel(
+                          id: '',
+                          name: name,
+                          description: desc,
+                          category: category,
+                          memberIds: [user.uid],
+                          createdBy: user.uid,
+                          createdAt: DateTime.now(),
+                        ),
+                      );
 
-                if (mounted) Navigator.pop(dialogContext);
+                  ref.invalidate(allCommunitiesProvider);
+                  if (mounted) Navigator.pop(dialogContext);
+                } catch (error) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Could not create community: $error')),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

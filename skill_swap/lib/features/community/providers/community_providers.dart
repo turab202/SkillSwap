@@ -5,10 +5,13 @@ import '../models/resource_model.dart';
 import '../repositories/community_repository.dart';
 import '../../auth/providers/auth_providers.dart';
 
-final communityRepositoryProvider = Provider<CommunityRepository>((_) => CommunityRepository());
+final communityRepositoryProvider = Provider<CommunityRepository>(
+  (_) => CommunityRepository(),
+);
 
-final allCommunitiesProvider = StreamProvider<List<CommunityModel>>((ref) =>
-    ref.watch(communityRepositoryProvider).watchCommunities());
+final allCommunitiesProvider = StreamProvider<List<CommunityModel>>(
+  (ref) => ref.watch(communityRepositoryProvider).watchCommunities(),
+);
 
 final userCommunitiesProvider = StreamProvider<List<CommunityModel>>((ref) {
   final authUser = ref.watch(authStateProvider).value;
@@ -18,12 +21,15 @@ final userCommunitiesProvider = StreamProvider<List<CommunityModel>>((ref) {
       .watchUserCommunities(authUser.uid);
 });
 
-final upcomingEventsProvider = StreamProvider<List<EventModel>>((ref) =>
-    ref.watch(communityRepositoryProvider).watchUpcomingEvents());
+final upcomingEventsProvider = StreamProvider<List<EventModel>>(
+  (ref) => ref.watch(communityRepositoryProvider).watchUpcomingEvents(),
+);
 
 final resourceCategoryProvider = StateProvider<String>((_) => 'All');
 
 final resourcesProvider = StreamProvider<List<ResourceModel>>((ref) {
   final category = ref.watch(resourceCategoryProvider);
-  return ref.watch(communityRepositoryProvider).watchResources(category: category);
+  return ref
+      .watch(communityRepositoryProvider)
+      .watchResources(category: category);
 });
