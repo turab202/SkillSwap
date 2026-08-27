@@ -6,6 +6,7 @@ import '../repositories/collaboration_repository.dart';
 import '../../home/providers/home_providers.dart';
 import '../../../core/services/firestore_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/common_widgets.dart';
 
 class CollaborationsScreen extends ConsumerStatefulWidget {
   const CollaborationsScreen({super.key});
@@ -131,7 +132,7 @@ class _CollabCard extends StatelessWidget {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-                backgroundImage: _otherPhoto != null ? NetworkImage(_otherPhoto!) : null,
+                backgroundImage: avatarImageProvider(_otherPhoto),
                 child: _otherPhoto == null ? Text(_otherName[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)) : null,
               ),
               const SizedBox(width: 10),

@@ -8,6 +8,7 @@ import '../../collaborations/repositories/collaboration_repository.dart';
 import '../providers/chat_providers.dart';
 import '../../../core/services/firestore_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/common_widgets.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -181,7 +182,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             CircleAvatar(
               radius: 16,
               backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-              backgroundImage: _other?.photoUrl != null ? NetworkImage(_other!.photoUrl!) : null,
+              backgroundImage: avatarImageProvider(_other?.photoUrl),
               child: _other?.photoUrl == null ? Text(_other?.displayName[0] ?? '?', style: const TextStyle(color: AppColors.primary, fontSize: 12)) : null,
             ),
             const SizedBox(width: 8),

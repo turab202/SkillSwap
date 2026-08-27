@@ -711,7 +711,7 @@ class _MentorshipTab extends ConsumerWidget {
                   CircleAvatar(
                     radius: 26,
                     backgroundColor: color.withValues(alpha: 0.15),
-                    backgroundImage: photo != null ? NetworkImage(photo) : null,
+                    backgroundImage: avatarImageProvider(photo),
                     child: photo == null
                         ? Text(
                             name[0],
@@ -990,7 +990,7 @@ class _PostCard extends StatelessWidget {
               CircleAvatar(
                 radius: 16,
                 backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-                backgroundImage: photo != null ? NetworkImage(photo) : null,
+                backgroundImage: avatarImageProvider(photo),
                 child: photo == null
                     ? Text(
                         name[0],

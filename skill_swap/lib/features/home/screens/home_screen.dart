@@ -360,7 +360,7 @@ class _CollabTile extends StatelessWidget {
             radius: 18,
             backgroundColor: AppColors.accent.withValues(alpha: 0.2),
             backgroundImage: otherPhoto != null
-                ? NetworkImage(otherPhoto)
+                ? avatarImageProvider(otherPhoto)
                 : null,
             child: otherPhoto == null
                 ? Text(
@@ -522,7 +522,7 @@ class _RecommendCard extends StatelessWidget {
                   radius: 22,
                   backgroundColor: AppColors.accent.withValues(alpha: 0.2),
                   backgroundImage: user.photoUrl != null
-                      ? NetworkImage(user.photoUrl!)
+                      ? avatarImageProvider(user.photoUrl)
                       : null,
                   child: user.photoUrl == null
                       ? Text(

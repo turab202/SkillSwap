@@ -2,6 +2,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+ImageProvider? avatarImageProvider(String? photoUrl) {
+  if (photoUrl == null || photoUrl.isEmpty) return null;
+  if (photoUrl.startsWith('data:')) {
+    final base64Str = photoUrl.contains(',') ? photoUrl.split(',').last : photoUrl;
+    try {
+      return MemoryImage(base64Decode(base64Str));
+    } catch (_) {
+      return null;
+    }
+  }
+  return NetworkImage(photoUrl);
+}
+
 /// Renders a CircleAvatar that handles both http URLs and base64 data URIs.
 class UserAvatar extends StatelessWidget {
   final String? photoUrl;
@@ -21,18 +34,7 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final url = photoUrl;
-    ImageProvider? image;
-    if (url != null && url.isNotEmpty) {
-      if (url.startsWith('data:')) {
-        final base64Str = url.contains(',') ? url.split(',').last : url;
-        try {
-          image = MemoryImage(base64Decode(base64Str));
-        } catch (_) {}
-      } else {
-        image = NetworkImage(url);
-      }
-    }
+    final image = avatarImageProvider(photoUrl);
     return CircleAvatar(
       radius: radius,
       backgroundColor: bgColor ?? AppColors.primary.withValues(alpha: 0.15),

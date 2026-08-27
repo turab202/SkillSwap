@@ -78,11 +78,10 @@ class CommunityRepository {
       FirestoreService.communities.add(community.toMap());
 
   // ── Events ─────────────────────────────────────────────────────────────────
-  Stream<List<EventModel>> watchUpcomingEvents() =>
-      FirestoreService.events
-          .limit(20)
-          .snapshots()
-          .map((s) => s.docs.map(EventModel.fromFirestore).toList());
+  Stream<List<EventModel>> watchUpcomingEvents() => FirestoreService.events
+      .limit(20)
+      .snapshots()
+      .map((s) => s.docs.map(EventModel.fromFirestore).toList());
 
   Future<void> attendEvent(String eventId, String userId) =>
       FirestoreService.events.doc(eventId).update({
@@ -105,7 +104,9 @@ class CommunityRepository {
           .where('category', isEqualTo: category)
           .limit(30);
     }
-    return q.snapshots().map((s) => s.docs.map(ResourceModel.fromFirestore).toList());
+    return q.snapshots().map(
+      (s) => s.docs.map(ResourceModel.fromFirestore).toList(),
+    );
   }
 
   Future<void> saveResource(String resourceId, String userId) =>
@@ -122,23 +123,20 @@ class CommunityRepository {
       FirestoreService.resources.add(resource.toMap());
 
   // ── Volunteer posts (reuse posts collection with type=volunteer) ───────────
-  Stream<QuerySnapshot> watchVolunteerPosts() =>
-      FirestoreService.posts
-          .where('type', isEqualTo: 'volunteer')
-          .limit(20)
-          .snapshots();
+  Stream<QuerySnapshot> watchVolunteerPosts() => FirestoreService.posts
+      .where('type', isEqualTo: 'volunteer')
+      .limit(20)
+      .snapshots();
 
   // ── Mentorship posts (reuse posts collection with type=mentorship) ─────────
-  Stream<QuerySnapshot> watchMentorshipPosts() =>
-      FirestoreService.posts
-          .where('type', isEqualTo: 'mentorship')
-          .limit(20)
-          .snapshots();
+  Stream<QuerySnapshot> watchMentorshipPosts() => FirestoreService.posts
+      .where('type', isEqualTo: 'mentorship')
+      .limit(20)
+      .snapshots();
 
   // ── Community projects (reuse posts collection) ────────────────────────────
-  Stream<QuerySnapshot> watchCommunityProjects() =>
-      FirestoreService.posts
-          .where('type', isEqualTo: 'community_project')
-          .limit(20)
-          .snapshots();
+  Stream<QuerySnapshot> watchCommunityProjects() => FirestoreService.posts
+      .where('type', isEqualTo: 'community_project')
+      .limit(20)
+      .snapshots();
 }

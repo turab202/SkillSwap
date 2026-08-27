@@ -6,6 +6,7 @@ import '../providers/chat_providers.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../../notifications/providers/notification_providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/app_scaffold.dart';
 
 class ChatListScreen extends ConsumerWidget {
@@ -151,7 +152,7 @@ class _ChatTile extends StatelessWidget {
               radius: 24,
               backgroundColor: AppColors.accent.withValues(alpha: 0.2),
               backgroundImage: otherPhoto != null
-                  ? NetworkImage(otherPhoto)
+                  ? avatarImageProvider(otherPhoto)
                   : null,
               child: otherPhoto == null
                   ? Text(

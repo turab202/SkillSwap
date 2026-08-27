@@ -367,7 +367,7 @@ class _PersonCard extends StatelessWidget {
               radius: 28,
               backgroundColor: AppColors.accent.withValues(alpha: 0.2),
               backgroundImage: user.photoUrl != null
-                  ? NetworkImage(user.photoUrl!)
+                  ? avatarImageProvider(user.photoUrl)
                   : null,
               child: user.photoUrl == null
                   ? Text(
@@ -959,7 +959,7 @@ class _PostCard extends StatelessWidget {
               CircleAvatar(
                 radius: 16,
                 backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-                backgroundImage: photo != null ? NetworkImage(photo) : null,
+                backgroundImage: avatarImageProvider(photo),
                 child: photo == null
                     ? Text(
                         name[0],

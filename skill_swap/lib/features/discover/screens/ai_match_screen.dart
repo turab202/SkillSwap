@@ -99,7 +99,7 @@ class _FullMatchCard extends StatelessWidget {
                     CircleAvatar(
                       radius: 26,
                       backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-                      backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                      backgroundImage: avatarImageProvider(user.photoUrl),
                       child: user.photoUrl == null ? Text(user.displayName[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 18)) : null,
                     ),
                     const SizedBox(width: 12),
@@ -228,7 +228,7 @@ class _CompactMatchCard extends StatelessWidget {
           CircleAvatar(
             radius: 22,
             backgroundColor: AppColors.accent.withValues(alpha: 0.2),
-            backgroundImage: user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+            backgroundImage: avatarImageProvider(user.photoUrl),
             child: user.photoUrl == null ? Text(user.displayName[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)) : null,
           ),
           const SizedBox(width: 12),
