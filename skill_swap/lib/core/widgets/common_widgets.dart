@@ -5,7 +5,9 @@ import '../theme/app_theme.dart';
 ImageProvider? avatarImageProvider(String? photoUrl) {
   if (photoUrl == null || photoUrl.isEmpty) return null;
   if (photoUrl.startsWith('data:')) {
-    final base64Str = photoUrl.contains(',') ? photoUrl.split(',').last : photoUrl;
+    final base64Str = photoUrl.contains(',')
+        ? photoUrl.split(',').last
+        : photoUrl;
     try {
       return MemoryImage(base64Decode(base64Str));
     } catch (_) {
@@ -42,7 +44,13 @@ class UserAvatar extends StatelessWidget {
       child: image == null
           ? Text(
               displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-              style: textStyle ?? TextStyle(fontSize: radius * 0.7, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style:
+                  textStyle ??
+                  TextStyle(
+                    fontSize: radius * 0.7,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
             )
           : null,
     );
@@ -70,10 +78,20 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = loading
-        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+        ? const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
         : icon != null
-            ? Row(mainAxisSize: MainAxisSize.min, children: [icon!, const SizedBox(width: 8), Text(label)])
-            : Text(label);
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [icon!, const SizedBox(width: 8), Text(label)],
+          )
+        : Text(label);
 
     Widget button;
     if (outlined) {
@@ -81,7 +99,9 @@ class AppButton extends StatelessWidget {
         onPressed: loading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: child,
       );
@@ -91,7 +111,9 @@ class AppButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: child,
       );
@@ -140,7 +162,14 @@ class AppTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
-          Text(label!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+          Text(
+            label!,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 6),
         ],
         TextFormField(
@@ -188,12 +217,23 @@ class SkillChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: textColor ?? AppColors.tagText, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: textColor ?? AppColors.tagText,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           if (removable) ...[
             const SizedBox(width: 4),
             GestureDetector(
               onTap: onRemove,
-              child: Icon(Icons.close, size: 14, color: textColor ?? AppColors.tagText),
+              child: Icon(
+                Icons.close,
+                size: 14,
+                color: textColor ?? AppColors.tagText,
+              ),
             ),
           ],
         ],
@@ -211,8 +251,18 @@ class MatchBadge extends StatelessWidget {
     final color = percent >= 80 ? AppColors.matchHigh : AppColors.matchMed;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-      child: Text('$percent% Match', style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$percent% Match',
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
@@ -222,18 +272,37 @@ class SectionHeader extends StatelessWidget {
   final String? action;
   final VoidCallback? onAction;
 
-  const SectionHeader({super.key, required this.title, this.action, this.onAction});
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.action,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
         if (action != null)
           GestureDetector(
             onTap: onAction,
-            child: Text(action!, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w500)),
+            child: Text(
+              action!,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
       ],
     );

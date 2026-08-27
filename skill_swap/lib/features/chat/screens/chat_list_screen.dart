@@ -134,7 +134,11 @@ class _ChatTile extends StatelessWidget {
     final unread = chat.unreadFor(myId);
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/chat', arguments: chat.otherUserId(myId)),
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/chat',
+        arguments: chat.otherUserId(myId),
+      ),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
