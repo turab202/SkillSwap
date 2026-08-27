@@ -225,18 +225,6 @@ class _PeopleTab extends ConsumerStatefulWidget {
 
 class _PeopleTabState extends ConsumerState<_PeopleTab> {
   final _searchC = TextEditingController();
-  String _category = 'All';
-
-  static const _cats = [
-    'All',
-    'Design',
-    'Coding',
-    'Language',
-    'Cooking',
-    'Music',
-    'Fitness',
-    'Gardening',
-  ];
 
   @override
   void dispose() {
@@ -246,7 +234,7 @@ class _PeopleTabState extends ConsumerState<_PeopleTab> {
 
   void _search() {
     ref.read(discoverSearchQueryProvider.notifier).state = _searchC.text.trim();
-    ref.read(discoverSkillFilterProvider.notifier).state = _category;
+    ref.read(discoverSkillFilterProvider.notifier).state = 'All';
   }
 
   @override
@@ -260,53 +248,7 @@ class _PeopleTabState extends ConsumerState<_PeopleTab> {
           controller: _searchC,
           hint: 'Search people by skill or name...',
           onSearch: _search,
-          filters: [
-            _FilterOption('Location ▾', () {}),
-            _FilterOption('Availability ▾', () {}),
-            _FilterOption('Experience ▾', () {}),
-          ],
         ),
-        SizedBox(
-          height: 36,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _cats.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final active = _cats[i] == _category;
-              return GestureDetector(
-                onTap: () {
-                  setState(() => _category = _cats[i]);
-                  ref.read(discoverSkillFilterProvider.notifier).state =
-                      _cats[i];
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: active ? AppColors.primary : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: active ? AppColors.primary : AppColors.border,
-                    ),
-                  ),
-                  child: Text(
-                    _cats[i],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: active ? Colors.white : AppColors.textSecondary,
-                      fontWeight: active ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
         Expanded(
           child: usersAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -765,6 +707,7 @@ class _ProjectsTabState extends ConsumerState<_ProjectsTab> {
                 itemCount: docs.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) => _PostCard(
+                  id: docs[i].id,
                   data: docs[i].data() as Map<String, dynamic>,
                   isProject: true,
                 ),
@@ -935,15 +878,19 @@ class _CommunitiesTabState extends ConsumerState<_CommunitiesTab> {
 }
 
 // ── Shared post card ───────────────────────────────────────────────────────
-class _PostCard extends StatelessWidget {
+class _PostCard extends ConsumerWidget {
+  final String? id;
   final Map<String, dynamic> data;
   final bool isProject;
-  const _PostCard({required this.data, this.isProject = false});
+  const _PostCard({this.id, required this.data, this.isProject = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final photo = data['userPhoto'] as String?;
     final name = data['userName'] as String? ?? '?';
+    final userId = ref.watch(authRepositoryProvider).currentFirebaseUser?.uid;
+    final participants = List<String>.from(data['participantIds'] ?? const []);
+    final isJoined = userId != null && participants.contains(userId);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1003,19 +950,48 @@ class _PostCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          SizedBox(
+            width: isProject ? double.infinity : null,
+            child: ElevatedButton.icon(
+              onPressed: isProject && id != null && userId != null && !isJoined
+                  ? () async {
+                      await FirestoreService.posts.doc(id).update({
+                        'participantIds': FieldValue.arrayUnion([userId]),
+                      });
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('You joined this project.'),
+                          ),
+                        );
+                      }
+                    }
+                  : isProject
+                  ? null
+                  : () {},
+              icon: Icon(
+                isProject && isJoined
+                    ? Icons.check_circle_outline
+                    : isProject
+                    ? Icons.group_add_outlined
+                    : Icons.chat_bubble_outline,
+                size: 18,
               ),
-              minimumSize: Size.zero,
-            ),
-            child: Text(
-              isProject ? 'Join Project' : 'Connect',
-              style: const TextStyle(fontSize: 13, color: Colors.white),
+              label: Text(
+                isProject ? (isJoined ? 'Joined' : 'Join Project') : 'Connect',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isJoined ? AppColors.tagBg : AppColors.primary,
+                foregroundColor: isJoined ? AppColors.tagText : Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: isJoined ? 0 : 1,
+              ),
             ),
           ),
         ],
