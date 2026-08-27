@@ -158,7 +158,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: _tab.index == 0 ? 300 : 340,
+                height: _tab.index == 0 ? 330 : 360,
                 child: TabBarView(
                   controller: _tab,
                   children: [
