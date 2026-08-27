@@ -6,11 +6,57 @@ import '../../../core/services/firestore_service.dart';
 
 class CommunityRepository {
   // ── Communities ────────────────────────────────────────────────────────────
-  Stream<List<CommunityModel>> watchCommunities() =>
-      FirestoreService.communities
-          .limit(30)
-          .snapshots()
-          .map((s) => s.docs.map(CommunityModel.fromFirestore).toList());
+  Stream<List<CommunityModel>> watchCommunities() async* {
+    final initial = await FirestoreService.communities.limit(1).get();
+    if (initial.docs.isEmpty) await _createStarterCommunities();
+
+    yield* FirestoreService.communities
+        .limit(30)
+        .snapshots()
+        .map((s) => s.docs.map(CommunityModel.fromFirestore).toList());
+  }
+
+  Future<void> _createStarterCommunities() async {
+    final starterCommunities = [
+      CommunityModel(
+        id: 'starter-coding',
+        name: 'Coding & Tech',
+        description: 'Learn programming, tools, and practical tech skills.',
+        category: 'Coding',
+        memberIds: const [],
+        createdBy: 'system',
+        createdAt: DateTime.now(),
+      ),
+      CommunityModel(
+        id: 'starter-creative',
+        name: 'Creative Makers',
+        description: 'Share ideas and improve your creative skills together.',
+        category: 'Creative',
+        memberIds: const [],
+        createdBy: 'system',
+        createdAt: DateTime.now(),
+      ),
+      CommunityModel(
+        id: 'starter-local-life',
+        name: 'Local Life',
+        description: 'Connect with neighbors and exchange useful skills.',
+        category: 'Local Life',
+        memberIds: const [],
+        createdBy: 'system',
+        createdAt: DateTime.now(),
+      ),
+    ];
+
+    final batch = FirebaseFirestore.instance.batch();
+    for (final community in starterCommunities) {
+      batch.set(
+        FirestoreService.communities.doc(community.id),
+        community.toMap(),
+        SetOptions(merge: true),
+      );
+    }
+    await batch.commit();
+  }
 
   Stream<List<CommunityModel>> watchUserCommunities(String userId) =>
       FirestoreService.communities
