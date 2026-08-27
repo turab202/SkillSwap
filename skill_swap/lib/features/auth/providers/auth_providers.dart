@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import '../models/user_model.dart';
 import '../repositories/auth_repository.dart';
 import '../../profile/repositories/profile_repository.dart';
@@ -69,7 +70,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithGoogle() async {
     state = const AuthState(status: AuthStatus.loading);
     try {
-      await _repo.signInWithGoogle();
+      await _repo.signInWithGoogle().timeout(const Duration(seconds: 45));
       state = const AuthState(status: AuthStatus.success);
       return true;
     } catch (e) {
@@ -111,6 +112,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   String _friendly(Object e) {
     final msg = e.toString();
+    if (e is TimeoutException) {
+      return 'Google sign-in timed out. Check your connection and try again.';
+    }
     if (e is FirebaseAuthException) {
       if (e.code == 'account-exists-with-different-credential') {
         return 'This email is already linked to another sign-in method.';

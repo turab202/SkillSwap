@@ -39,9 +39,13 @@ class AuthRepository {
 
   // ── Google ─────────────────────────────────────────────────────────────────
   Future<void> signInWithGoogle() async {
-    final googleUser = await _googleSignIn.signIn();
+    final googleUser = await _googleSignIn
+        .signIn()
+        .timeout(const Duration(seconds: 30));
     if (googleUser == null) throw Exception('Google sign-in cancelled.');
-    final googleAuth = await googleUser.authentication;
+    final googleAuth = await googleUser.authentication.timeout(
+      const Duration(seconds: 30),
+    );
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
