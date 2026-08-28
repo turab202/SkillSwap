@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { UserModel } from '@/lib/models';
@@ -37,6 +37,10 @@ export function DiscoverShell({ currentUid }: { currentUid: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedPerson, setSelectedPerson] = useState<UserModel | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileMessage, setProfileMessage] = useState('');
+  const [profile, setProfile] = useState({ name: '', location: '', offered: '', wanted: '', experience: 'Novice', availability: 'Flexible', bio: '' });
 
   useEffect(() => {
     let active = true;
@@ -73,6 +77,33 @@ export function DiscoverShell({ currentUid }: { currentUid: string }) {
     });
   }, [currentUid, people, search, skill]);
 
+  async function openProfile() {
+    setProfileMessage('');
+    setProfileOpen(true);
+    const snapshot = await getDoc(doc(db, 'users', currentUid));
+    const data = snapshot.data();
+    if (data) setProfile({
+      name: String(data.displayName ?? auth.currentUser?.displayName ?? ''), location: String(data.location ?? ''),
+      offered: Array.isArray(data.skillsOffered) ? data.skillsOffered.join(', ') : '', wanted: Array.isArray(data.skillsWanted) ? data.skillsWanted.join(', ') : '',
+      experience: String(data.experienceLevel ?? 'Novice'), availability: String(data.availability ?? 'Flexible'), bio: String(data.bio ?? ''),
+    });
+  }
+
+  async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!profile.name.trim()) { setProfileMessage('Name is required.'); return; }
+    setProfileBusy(true); setProfileMessage('');
+    try {
+      await setDoc(doc(db, 'users', currentUid), {
+        uid: currentUid, email: auth.currentUser?.email ?? '', displayName: profile.name.trim(), location: profile.location.trim() || null,
+        skillsOffered: profile.offered.split(',').map((item) => item.trim()).filter(Boolean), skillsWanted: profile.wanted.split(',').map((item) => item.trim()).filter(Boolean),
+        experienceLevel: profile.experience, availability: profile.availability, bio: profile.bio.trim(), profileComplete: true, createdAt: serverTimestamp(),
+      }, { merge: true });
+      setProfileMessage('Profile saved. Refresh Discover to see your updates.');
+    } catch (saveError) { setProfileMessage(saveError instanceof Error ? saveError.message : 'Could not save profile.'); }
+    finally { setProfileBusy(false); }
+  }
+
   return (
     <main className="workspace-page">
       <aside className="workspace-sidebar">
@@ -81,7 +112,7 @@ export function DiscoverShell({ currentUid }: { currentUid: string }) {
           <a className="nav-link active" href="#discover">Discover</a>
           <a className="nav-link" href="#collaborations">Collaborations</a>
           <a className="nav-link" href="#communities">Communities</a>
-          <a className="nav-link" href="#profile">My profile</a>
+          <button className="nav-link nav-button" onClick={() => void openProfile()} type="button">My profile</button>
         </nav>
         <button className="sign-out" type="button" onClick={() => signOut(auth)}>Sign out</button>
       </aside>
@@ -122,6 +153,22 @@ export function DiscoverShell({ currentUid }: { currentUid: string }) {
             <p className="dialog-bio">{selectedPerson.bio || 'Open to a thoughtful skill exchange.'}</p>
             <h3>Offers</h3><div className="skill-tags">{selectedPerson.skillsOffered.map((item) => <span key={item}>{item}</span>)}</div>
             <h3>Wants to learn</h3><div className="skill-tags">{selectedPerson.skillsWanted.length > 0 ? selectedPerson.skillsWanted.map((item) => <span key={item}>{item}</span>) : <span>No skills listed yet</span>}</div>
+          </section>
+        </div>}
+        {profileOpen && <div className="profile-dialog-backdrop" role="presentation" onClick={() => setProfileOpen(false)}>
+          <section className="profile-dialog profile-editor" role="dialog" aria-modal="true" aria-labelledby="profile-editor-title" onClick={(event) => event.stopPropagation()}>
+            <button className="dialog-close" aria-label="Close profile editor" onClick={() => setProfileOpen(false)} type="button">×</button>
+            <p className="eyebrow">YOUR PROFILE</p><h2 id="profile-editor-title">Tell the community what you bring.</h2>
+            <form onSubmit={saveProfile}>
+              <label>Full name<input required value={profile.name} onChange={(event) => setProfile({ ...profile, name: event.target.value })} /></label>
+              <label>Location<input value={profile.location} onChange={(event) => setProfile({ ...profile, location: event.target.value })} placeholder="City or neighborhood" /></label>
+              <label>Skills you offer<input value={profile.offered} onChange={(event) => setProfile({ ...profile, offered: event.target.value })} placeholder="Photography, cooking" /></label>
+              <label>Skills you want to learn<input value={profile.wanted} onChange={(event) => setProfile({ ...profile, wanted: event.target.value })} placeholder="Spanish, gardening" /></label>
+              <div className="editor-row"><label>Experience<select value={profile.experience} onChange={(event) => setProfile({ ...profile, experience: event.target.value })}><option>Novice</option><option>Expert</option><option>Master</option></select></label><label>Availability<select value={profile.availability} onChange={(event) => setProfile({ ...profile, availability: event.target.value })}><option>Weekdays</option><option>Weekends</option><option>Evenings</option><option>Weekends, Evenings</option><option>Flexible</option></select></label></div>
+              <label>About you<textarea rows={3} value={profile.bio} onChange={(event) => setProfile({ ...profile, bio: event.target.value })} /></label>
+              <button className="primary-button" disabled={profileBusy} type="submit">{profileBusy ? 'Saving...' : 'Save profile'}</button>
+            </form>
+            {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
           </section>
         </div>}
       </section>
