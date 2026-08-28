@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
@@ -274,17 +275,6 @@ class _OnboardingIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = switch (type) {
-      _Illustration.people => Icons.people_alt,
-      _Illustration.knowledge => Icons.lightbulb,
-      _Illustration.community => Icons.public,
-    };
-    final color = switch (type) {
-      _Illustration.people => const Color(0xFF76C832),
-      _Illustration.knowledge => const Color(0xFFFFC94D),
-      _Illustration.community => const Color(0xFF52B788),
-    };
-
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -292,56 +282,7 @@ class _OnboardingIllustration extends StatelessWidget {
           return SizedBox(
             width: size,
             height: size * 0.82,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: size * 0.72,
-                  height: size * 0.72,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: color.withValues(alpha: 0.12),
-                    border: Border.all(
-                      color: color.withValues(alpha: 0.24),
-                      width: 2,
-                    ),
-                  ),
-                ),
-                Icon(icon, size: size * 0.34, color: color),
-                Positioned(
-                  top: size * 0.05,
-                  left: size * 0.12,
-                  child: _Bubble(icon: Icons.school, color: AppColors.primary),
-                ),
-                Positioned(
-                  top: size * 0.13,
-                  right: size * 0.08,
-                  child: _Bubble(icon: Icons.code, color: AppColors.primary),
-                ),
-                Positioned(
-                  bottom: size * 0.04,
-                  left: size * 0.08,
-                  child: _Bubble(icon: Icons.lightbulb_outline, color: color),
-                ),
-                Positioned(
-                  bottom: size * 0.02,
-                  right: size * 0.10,
-                  child: _Bubble(icon: Icons.palette_outlined, color: color),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: size * 0.19,
-                  child: Container(
-                    width: size * 0.62,
-                    height: size * 0.11,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: CustomPaint(painter: _ScenePainter(type)),
           );
         },
       ),
@@ -349,31 +290,158 @@ class _OnboardingIllustration extends StatelessWidget {
   }
 }
 
-class _Bubble extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  const _Bubble({required this.icon, required this.color});
+class _ScenePainter extends CustomPainter {
+  final _Illustration type;
+  _ScenePainter(this.type);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.16),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 300;
+    final center = Offset(size.width / 2, size.height * .44);
+    final green = const Color(0xFF168044);
+    final lime = const Color(0xFF83C936);
+    final accent = type == _Illustration.knowledge
+        ? const Color(0xFFFFC94D)
+        : const Color(0xFF52B788);
+    canvas.drawCircle(
+      center,
+      103 * s,
+      Paint()..color = const Color(0xFFEAF8EE),
+    );
+    final orbit = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2 * s
+      ..color = accent.withValues(alpha: .45);
+    canvas.drawOval(
+      Rect.fromCenter(center: center, width: 250 * s, height: 92 * s),
+      orbit,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(center: center, width: 208 * s, height: 142 * s),
+      orbit..color = green.withValues(alpha: .2),
+    );
+    if (type == _Illustration.knowledge) {
+      _books(canvas, center.translate(0, 58 * s), s, green, accent);
+      _bulb(canvas, center.translate(0, -28 * s), s, accent);
+    } else if (type == _Illustration.community) {
+      _globe(canvas, center.translate(0, 2 * s), s, green, accent);
+      _person(canvas, center.translate(-73 * s, -55 * s), s, green);
+      _person(canvas, center.translate(73 * s, -42 * s), s, green);
+    } else {
+      _books(canvas, center.translate(0, 56 * s), s, green, lime);
+      _person(canvas, center.translate(-48 * s, 0), s, green);
+      _person(canvas, center.translate(48 * s, 0), s, green);
+    }
+    _leaf(canvas, center.translate(-78 * s, 56 * s), s, lime, -.6);
+    _leaf(canvas, center.translate(78 * s, 52 * s), s, green, .6);
+    for (var i = 0; i < 8; i++) {
+      final a = i * .78;
+      canvas.drawCircle(
+        center + Offset(cos(a) * 126 * s, sin(a) * 82 * s),
+        (i.isEven ? 4 : 3) * s,
+        Paint()..color = accent.withValues(alpha: .55),
+      );
+    }
+  }
+
+  void _books(Canvas c, Offset p, double s, Color green, Color accent) {
+    c.drawOval(
+      Rect.fromCenter(
+        center: p.translate(0, 25 * s),
+        width: 180 * s,
+        height: 22 * s,
       ),
-      child: Icon(icon, color: color, size: 28),
+      Paint()..color = green.withValues(alpha: .12),
+    );
+    for (var i = 0; i < 3; i++) {
+      final r = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: p.translate(0, -i * 19 * s),
+          width: (150 - i * 12) * s,
+          height: 24 * s,
+        ),
+        Radius.circular(7 * s),
+      );
+      c.drawRRect(r, Paint()..color = i == 1 ? accent : green);
+    }
+  }
+
+  void _bulb(Canvas c, Offset p, double s, Color accent) {
+    c.drawCircle(
+      p.translate(0, -3 * s),
+      27 * s,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [const Color(0xFFFFF3A8), accent],
+        ).createShader(Rect.fromCircle(center: p, radius: 28 * s)),
+    );
+    c.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: p.translate(0, 25 * s),
+          width: 23 * s,
+          height: 15 * s,
+        ),
+        Radius.circular(4 * s),
+      ),
+      Paint()..color = const Color(0xFF168044),
     );
   }
+
+  void _globe(Canvas c, Offset p, double s, Color green, Color accent) {
+    c.drawCircle(
+      p,
+      56 * s,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [accent, green],
+        ).createShader(Rect.fromCircle(center: p, radius: 56 * s)),
+    );
+    final line = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2 * s
+      ..color = Colors.white.withValues(alpha: .55);
+    c.drawOval(
+      Rect.fromCenter(center: p, width: 45 * s, height: 112 * s),
+      line,
+    );
+    c.drawOval(
+      Rect.fromCenter(center: p, width: 112 * s, height: 38 * s),
+      line,
+    );
+  }
+
+  void _person(Canvas c, Offset p, double s, Color color) {
+    c.drawCircle(p.translate(0, -17 * s), 13 * s, Paint()..color = color);
+    final body = Path()
+      ..moveTo(p.dx - 25 * s, p.dy + 28 * s)
+      ..quadraticBezierTo(p.dx - 23 * s, p.dy - 5 * s, p.dx, p.dy - 2 * s)
+      ..quadraticBezierTo(
+        p.dx + 23 * s,
+        p.dy - 5 * s,
+        p.dx + 25 * s,
+        p.dy + 28 * s,
+      )
+      ..close();
+    c.drawPath(body, Paint()..color = color);
+  }
+
+  void _leaf(Canvas c, Offset p, double s, Color color, double angle) {
+    c.save();
+    c.translate(p.dx, p.dy);
+    c.rotate(angle);
+    final leaf = Path()
+      ..moveTo(0, 20 * s)
+      ..quadraticBezierTo(-35 * s, -4 * s, 0, -32 * s)
+      ..quadraticBezierTo(35 * s, -4 * s, 0, 20 * s)
+      ..close();
+    c.drawPath(leaf, Paint()..color = color);
+    c.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScenePainter oldDelegate) =>
+      oldDelegate.type != type;
 }
 
 class _Dots extends StatelessWidget {
