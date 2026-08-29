@@ -30,7 +30,7 @@ function asUserModel(id: string, data: Record<string, unknown>): UserModel {
   };
 }
 
-export function DiscoverShell({ currentUid }: { currentUid: string }) {
+export function DiscoverShell({ currentUid, onNavigate, currentSection }: { currentUid: string; onNavigate?: (section: 'dashboard' | 'discover' | 'profile' | 'collaborations') => void; currentSection?: string }) {
   const [people, setPeople] = useState<UserModel[]>([]);
   const [search, setSearch] = useState('');
   const [skill, setSkill] = useState('All skills');
@@ -109,10 +109,10 @@ export function DiscoverShell({ currentUid }: { currentUid: string }) {
       <aside className="workspace-sidebar">
         <div className="brand-mark"><span>SS</span><strong>SkillSwap</strong></div>
         <nav aria-label="Primary navigation">
-          <a className="nav-link active" href="#discover">Discover</a>
-          <a className="nav-link" href="#collaborations">Collaborations</a>
-          <a className="nav-link" href="#communities">Communities</a>
-          <button className="nav-link nav-button" onClick={() => void openProfile()} type="button">My profile</button>
+          <button className={`nav-link nav-button ${currentSection === 'dashboard' ? 'active' : ''}`} onClick={() => onNavigate?.('dashboard')} type="button">Home</button>
+          <button className={`nav-link nav-button ${currentSection === 'discover' ? 'active' : ''}`} onClick={() => onNavigate?.('discover')} type="button">Discover</button>
+          <button className={`nav-link nav-button ${currentSection === 'collaborations' ? 'active' : ''}`} onClick={() => onNavigate?.('collaborations')} type="button">Collaborations</button>
+          <button className={`nav-link nav-button ${currentSection === 'profile' ? 'active' : ''}`} onClick={() => void openProfile()} type="button">My profile</button>
         </nav>
         <button className="sign-out" type="button" onClick={() => signOut(auth)}>Sign out</button>
       </aside>
