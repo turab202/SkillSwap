@@ -47,3 +47,20 @@ export interface PostModel {
   createdAt: FirestoreDate;
   location?: string;
 }
+
+export interface CollaborationModel {
+  id: string;
+  requesterId: string;
+  requesterName: string;
+  requesterPhoto?: string | null;
+  targetId: string;
+  targetName: string;
+  targetPhoto?: string | null;
+  skillOffered: string;
+  skillWanted: string;
+  status: 'pending' | 'accepted' | 'inProgress' | 'completed' | 'cancelled';
+  message?: string | null;
+  createdAt: FirestoreDate;
+  scheduledAt?: FirestoreDate | null;
+  completedAt?: FirestoreDate | null;
+}

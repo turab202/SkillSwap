@@ -6,6 +6,7 @@ import { auth } from '@/lib/firebase';
 import { AuthForm } from '@/components/auth-form';
 import { Dashboard } from '@/components/dashboard';
 import { DiscoverShell } from '@/components/discover-shell';
+import { Collaborations } from '@/components/collaborations';
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -18,7 +19,11 @@ export default function HomePage() {
   }), []);
 
   if (checkingAuth) return <main className="auth-loading">Loading SkillSwap...</main>;
-  if (user) return section === 'discover' ? <DiscoverShell currentUid={user.uid} onNavigate={setSection} currentSection={section} /> : <Dashboard currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+  if (user) {
+    if (section === 'discover') return <DiscoverShell currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+    if (section === 'collaborations') return <Collaborations currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+    return <Dashboard currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+  }
 
   return (
     <main className="auth-page">
