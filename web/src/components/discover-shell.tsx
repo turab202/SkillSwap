@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, serverTimestamp, setDoc, where, addDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import type { UserModel } from '@/lib/models';
@@ -41,6 +41,12 @@ export function DiscoverShell({ currentUid, onNavigate, currentSection }: { curr
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileMessage, setProfileMessage] = useState('');
   const [profile, setProfile] = useState({ name: '', location: '', offered: '', wanted: '', experience: 'Novice', availability: 'Flexible', bio: '' });
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestBusy, setRequestBusy] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
+  const [skillWanted, setSkillWanted] = useState('');
+  const [skillOffered, setSkillOffered] = useState('');
+  const [requestText, setRequestText] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -104,6 +110,46 @@ export function DiscoverShell({ currentUid, onNavigate, currentSection }: { curr
     finally { setProfileBusy(false); }
   }
 
+  async function openRequestModal() {
+    setRequestMessage('');
+    setSkillWanted('');
+    setSkillOffered('');
+    setRequestText('');
+    setRequestOpen(true);
+  }
+
+  async function submitRequest(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!skillWanted.trim()) { setRequestMessage('Please select a skill to learn.'); return; }
+    if (!skillOffered.trim()) { setRequestMessage('Please select a skill to offer.'); return; }
+    if (!selectedPerson) return;
+    
+    setRequestBusy(true);
+    setRequestMessage('');
+    try {
+      await addDoc(collection(db, 'collaborations'), {
+        requesterId: currentUid,
+        requesterName: auth.currentUser?.displayName ?? 'SkillSwap member',
+        requesterPhoto: auth.currentUser?.photoURL ?? null,
+        targetId: selectedPerson.uid,
+        targetName: selectedPerson.displayName,
+        targetPhoto: selectedPerson.photoUrl ?? null,
+        skillOffered: skillOffered.trim(),
+        skillWanted: skillWanted.trim(),
+        status: 'pending',
+        message: requestText.trim() || null,
+        createdAt: serverTimestamp(),
+      });
+      setRequestMessage('Request sent! They will review your offer soon.');
+      setRequestOpen(false);
+      setSelectedPerson(null);
+    } catch (submitError) {
+      setRequestMessage(submitError instanceof Error ? submitError.message : 'Could not send request.');
+    } finally {
+      setRequestBusy(false);
+    }
+  }
+
   return (
     <main className="workspace-page">
       <aside className="workspace-sidebar">
@@ -153,6 +199,7 @@ export function DiscoverShell({ currentUid, onNavigate, currentSection }: { curr
             <p className="dialog-bio">{selectedPerson.bio || 'Open to a thoughtful skill exchange.'}</p>
             <h3>Offers</h3><div className="skill-tags">{selectedPerson.skillsOffered.map((item) => <span key={item}>{item}</span>)}</div>
             <h3>Wants to learn</h3><div className="skill-tags">{selectedPerson.skillsWanted.length > 0 ? selectedPerson.skillsWanted.map((item) => <span key={item}>{item}</span>) : <span>No skills listed yet</span>}</div>
+            <button className="primary-button" onClick={() => openRequestModal()} type="button">Request Skill Swap</button>
           </section>
         </div>}
         {profileOpen && <div className="profile-dialog-backdrop" role="presentation" onClick={() => setProfileOpen(false)}>
@@ -169,6 +216,19 @@ export function DiscoverShell({ currentUid, onNavigate, currentSection }: { curr
               <button className="primary-button" disabled={profileBusy} type="submit">{profileBusy ? 'Saving...' : 'Save profile'}</button>
             </form>
             {profileMessage && <p className="auth-message" role="status">{profileMessage}</p>}
+          </section>
+        </div>}
+        {requestOpen && selectedPerson && <div className="profile-dialog-backdrop" role="presentation" onClick={() => setRequestOpen(false)}>
+          <section className="profile-dialog profile-editor" role="dialog" aria-modal="true" aria-labelledby="request-title" onClick={(event) => event.stopPropagation()}>
+            <button className="dialog-close" aria-label="Close request form" onClick={() => setRequestOpen(false)} type="button">×</button>
+            <p className="eyebrow">PROPOSE AN EXCHANGE</p><h2 id="request-title">Skill swap with {selectedPerson.displayName}</h2>
+            <form onSubmit={submitRequest}>
+              <label>Skill you want to learn<select value={skillWanted} onChange={(event) => setSkillWanted(event.target.value)}><option value="">— Select one of their skills —</option>{selectedPerson.skillsOffered.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+              <label>Skill you can offer<input value={skillOffered} onChange={(event) => setSkillOffered(event.target.value)} placeholder="Which of your skills would you share?" /></label>
+              <label>Message (optional)<textarea rows={3} value={requestText} onChange={(event) => setRequestText(event.target.value)} placeholder="Tell them why you're interested..." /></label>
+              <button className="primary-button" disabled={requestBusy} type="submit">{requestBusy ? 'Sending...' : 'Send request'}</button>
+            </form>
+            {requestMessage && <p className="auth-message" role="status">{requestMessage}</p>}
           </section>
         </div>}
       </section>
