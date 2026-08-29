@@ -82,3 +82,16 @@ export interface ChatModel {
   lastAt: FirestoreDate;
   unreadCounts: Record<string, number>;
 }
+
+export type NotificationType = 'match' | 'request' | 'community' | 'collaboration' | 'appreciation' | 'system';
+
+export interface NotificationModel {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+  read: boolean;
+  actionId?: string | null;
+  createdAt: FirestoreDate;
+}
