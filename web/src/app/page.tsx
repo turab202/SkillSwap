@@ -8,11 +8,12 @@ import { Dashboard } from '@/components/dashboard';
 import { DiscoverShell } from '@/components/discover-shell';
 import { Collaborations } from '@/components/collaborations';
 import { Posts } from '@/components/posts';
+import { Messaging } from '@/components/messaging';
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [section, setSection] = useState<'dashboard' | 'discover' | 'profile' | 'collaborations' | 'posts'>('dashboard');
+  const [section, setSection] = useState<'dashboard' | 'discover' | 'profile' | 'collaborations' | 'posts' | 'messaging'>('dashboard');
 
   useEffect(() => onAuthStateChanged(auth, (nextUser) => {
     setUser(nextUser);
@@ -23,6 +24,7 @@ export default function HomePage() {
   if (user) {
     if (section === 'discover') return <DiscoverShell currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
     if (section === 'posts') return <Posts currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+    if (section === 'messaging') return <Messaging currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
     if (section === 'collaborations') return <Collaborations currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
     return <Dashboard currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
   }

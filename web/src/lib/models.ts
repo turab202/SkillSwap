@@ -64,3 +64,21 @@ export interface CollaborationModel {
   scheduledAt?: FirestoreDate | null;
   completedAt?: FirestoreDate | null;
 }
+
+export interface MessageModel {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  createdAt: FirestoreDate;
+}
+
+export interface ChatModel {
+  id: string;
+  participantIds: string[];
+  participantNames: Record<string, string>;
+  participantPhotos: Record<string, string | null>;
+  lastMessage: string;
+  lastAt: FirestoreDate;
+  unreadCounts: Record<string, number>;
+}
