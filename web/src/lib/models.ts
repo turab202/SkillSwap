@@ -83,6 +83,27 @@ export interface ChatModel {
   unreadCounts: Record<string, number>;
 }
 
+export interface EndorsementModel {
+  id: string;
+  fromUserId: string;
+  fromUserName: string;
+  toUserId: string;
+  badge: string;
+  createdAt: FirestoreDate;
+}
+
+export interface ReviewModel {
+  id: string;
+  fromUserId: string;
+  fromUserName: string;
+  fromUserPhoto?: string | null;
+  toUserId: string;
+  rating: number;
+  comment: string;
+  collaborationId: string;
+  createdAt: FirestoreDate;
+}
+
 export type NotificationType = 'match' | 'request' | 'community' | 'collaboration' | 'appreciation' | 'system';
 
 export interface NotificationModel {

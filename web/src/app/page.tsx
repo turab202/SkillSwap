@@ -10,11 +10,13 @@ import { Collaborations } from '@/components/collaborations';
 import { Posts } from '@/components/posts';
 import { Messaging } from '@/components/messaging';
 import { Notifications } from '@/components/notifications';
+import { ProfilePage } from '@/components/profile-page';
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [section, setSection] = useState<'dashboard' | 'discover' | 'profile' | 'collaborations' | 'posts' | 'messaging' | 'notifications'>('dashboard');
+  const [section, setSection] = useState<'dashboard' | 'discover' | 'profile' | 'collaborations' | 'posts' | 'messaging' | 'notifications' | 'user-profile'>('dashboard');
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
 
   useEffect(() => onAuthStateChanged(auth, (nextUser) => {
     setUser(nextUser);
@@ -28,6 +30,7 @@ export default function HomePage() {
     if (section === 'messaging') return <Messaging currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
     if (section === 'notifications') return <Notifications currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
     if (section === 'collaborations') return <Collaborations currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
+    if (section === 'user-profile' && viewingUserId) return <ProfilePage userId={viewingUserId} />;
     return <Dashboard currentUid={user.uid} onNavigate={setSection} currentSection={section} />;
   }
 
