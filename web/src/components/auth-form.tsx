@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   GoogleAuthProvider,
   browserLocalPersistence,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   setPersistence,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   updateProfile,
 } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
@@ -20,6 +21,37 @@ export function AuthForm() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function handleRedirectResult() {
+      try {
+        const result = await getRedirectResult(auth);
+        if (!result?.user || ignore) return;
+
+        await saveUserDocument(
+          result.user.uid,
+          result.user.email ?? '',
+          result.user.displayName ?? 'User',
+          result.user.photoURL,
+        );
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Google redirect sign-in failed.';
+        console.error('Google redirect sign-in failed:', error);
+
+        if (errorMessage.includes('network-request-failed')) {
+          setMessage('Network error during Google sign-in. Check your internet connection and verify Firebase Auth authorized domains in the Firebase console.');
+        }
+      }
+    }
+
+    handleRedirectResult();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   async function saveUserDocument(uid: string, userEmail: string, displayName: string, photoUrl?: string | null) {
     await setDoc(doc(db, 'users', uid), {
@@ -68,12 +100,20 @@ export function AuthForm() {
     setBusy(true);
     setMessage('');
     try {
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
-      await saveUserDocument(result.user.uid, result.user.email ?? '', result.user.displayName ?? 'User', result.user.photoURL);
-      setMessage('Signed in with Google.');
+      await setPersistence(auth, browserLocalPersistence);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithRedirect(auth, provider);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Google Sign-In failed.');
-    } finally {
+      const errorMsg = error instanceof Error ? error.message : 'Google Sign-In failed.';
+
+      if (errorMsg.includes('network-request-failed')) {
+        setMessage('Network error during Google sign-in. Check your connection and make sure localhost is enabled in Firebase Auth > Settings > Authorized domains.');
+      } else {
+        setMessage(errorMsg.includes('cancelled') ? 'Sign-in cancelled.' : errorMsg);
+      }
+
+      console.error('Google Sign-In error:', error);
       setBusy(false);
     }
   }
