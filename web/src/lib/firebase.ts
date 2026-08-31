@@ -13,6 +13,12 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Verify Firebase config is complete
+const isConfigValid = Object.values(firebaseConfig).every(value => value !== undefined && value !== '');
+if (!isConfigValid) {
+  console.error('Firebase config is incomplete. Make sure all NEXT_PUBLIC_FIREBASE_* environment variables are set in .env.local');
+}
+
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);

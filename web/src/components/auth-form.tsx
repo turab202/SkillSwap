@@ -100,6 +100,10 @@ export function AuthForm() {
     setBusy(true);
     setMessage('');
     try {
+      if (!auth) {
+        throw new Error('Firebase Auth is not initialized. Check your environment variables (NEXT_PUBLIC_FIREBASE_*).');
+      }
+
       await setPersistence(auth, browserLocalPersistence);
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -109,6 +113,8 @@ export function AuthForm() {
 
       if (errorMsg.includes('network-request-failed')) {
         setMessage('Network error during Google sign-in. Check your connection and make sure localhost is enabled in Firebase Auth > Settings > Authorized domains.');
+      } else if (errorMsg.includes('not initialized')) {
+        setMessage('Firebase is not properly configured. Make sure all Firebase environment variables are set in .env.local.');
       } else {
         setMessage(errorMsg.includes('cancelled') ? 'Sign-in cancelled.' : errorMsg);
       }
